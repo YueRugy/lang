@@ -61,55 +61,53 @@ func NewLogger(level string) (myLogger, error) {
 	}
 	return log, nil
 }
-func judge(log myLogger, level logLevel) bool {
-	return log.logLevel <= level
+func judge(logLevel, level logLevel) bool {
+	return logLevel <= level
 }
 func (log myLogger) Debug(format string, a ...interface{}) {
-	if judge(log, DEBUG) {
-		logPri(log.logLevel, format, a)
-	}
+	logPri(log.logLevel, DEBUG, format, a)
+
 }
 
 func (log myLogger) Trace(format string, a ...interface{}) {
-	if judge(log, TRACE) {
-		logPri(log.logLevel, format, a)
-	}
+	logPri(log.logLevel, TRACE, format, a)
+
 }
 
 func (log myLogger) Info(format string, a ...interface{}) {
-	if judge(log, INFO) {
-		logPri(log.logLevel, format, a)
-	}
+	logPri(log.logLevel, INFO, format, a)
+
 }
 
 func (log myLogger) Warning(format string, a ...interface{}) {
-	if judge(log, WARRING) {
-		logPri(log.logLevel, format, a)
-	}
+	logPri(log.logLevel, WARRING, format, a)
+
 }
 
 func (log myLogger) Error(format string, a ...interface{}) {
-	if judge(log, ERROR) {
-		logPri(log.logLevel, format, a)
-	}
+	logPri(log.logLevel, ERROR, format, a)
+
 }
 
 func (log myLogger) Fatal(format string, a ...interface{}) {
-	if judge(log, FATAL) {
-		logPri(log.logLevel, format, a)
-	}
+
+	logPri(log.logLevel, FATAL, format, a)
+
 }
 
 func timeParse() string {
 	t := time.Now()
 	return t.Format("2006-01-02 15:04:05")
 }
-func logPri(level logLevel, format string, a ...interface{}) {
-	sli := info(3)
-	msg := fmt.Sprintf(format, a...)
-	line, _ := strconv.Atoi(sli[2])
-	fmt.Printf("[%s] [%s] [%s:%s:%d] [%s]\n", timeParse(),
-		unParse(level), sli[1], sli[0], line, msg)
+func logPri(logLevel, level logLevel, format string, a ...interface{}) {
+	if judge(logLevel, level) {
+
+		sli := info(3)
+		msg := fmt.Sprintf(format, a...)
+		line, _ := strconv.Atoi(sli[2])
+		fmt.Printf("[%s] [%s] [%s:%s:%d] [%s]\n", timeParse(),
+			unParse(level), sli[1], sli[0], line, msg)
+	}
 }
 func info(skip int) []string {
 	pc, file, line, ok := runtime.Caller(skip)
