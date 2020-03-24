@@ -3,6 +3,9 @@ package myLog
 import (
 	"errors"
 	"fmt"
+	"path"
+	"runtime"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -63,41 +66,81 @@ func judge(log myLogger, level logLevel) bool {
 }
 func (log myLogger) Debug(msg string) {
 	if judge(log, DEBUG) {
-		fmt.Printf("[%s] [DEBUG] %s\n", timeParse(), msg)
+		logPri(log.logLevel, msg)
 	}
 }
 
 func (log myLogger) Trace(msg string) {
 	if judge(log, TRACE) {
-		fmt.Printf("[%s] [DEBUG] %s\n", timeParse(), msg)
+		logPri(log.logLevel, msg)
 	}
 }
 
 func (log myLogger) Info(msg string) {
 	if judge(log, INFO) {
-		fmt.Printf("[%s] [DEBUG] %s\n", timeParse(), msg)
+		logPri(log.logLevel, msg)
 	}
 }
 
 func (log myLogger) Warning(msg string) {
 	if judge(log, WARRING) {
-		fmt.Printf("[%s] [DEBUG] %s\n", timeParse(), msg)
+		logPri(log.logLevel, msg)
 	}
 }
 
 func (log myLogger) Error(msg string) {
 	if judge(log, ERROR) {
-		fmt.Printf("[%s] [DEBUG] %s\n", timeParse(), msg)
+		logPri(log.logLevel, msg)
 	}
 }
 
 func (log myLogger) Fatal(msg string) {
 	if judge(log, FATAL) {
-		fmt.Printf("[%s] [DEBUG] %s\n", timeParse(), msg)
+		logPri(log.logLevel, msg)
 	}
 }
 
 func timeParse() string {
 	t := time.Now()
 	return t.Format("2006-01-02 15:04:05")
+}
+func logPri(level logLevel, msg string) {
+	sli := info(3)
+	line, _ := strconv.Atoi(sli[2])
+	fmt.Printf("[%s] [%s] [%s] [%s] [%d] [%s]\n", timeParse(),
+		unParse(level), sli[1], sli[0], line, msg)
+}
+func info(skip int) []string {
+	pc, file, line, ok := runtime.Caller(skip)
+	if !ok {
+		fmt.Println("get info failed")
+		return nil
+	}
+
+	methodName := strings.Split(runtime.FuncForPC(pc).Name(), ".")[0]
+	basePath := path.Base(file)
+
+	sli := make([]string, 0, 3)
+	sli = append(append(append(sli, methodName), basePath), strconv.Itoa(line))
+	return sli
+}
+
+func unParse(level logLevel) string {
+	switch level {
+	case DEBUG:
+		return "DEBUG"
+	case INFO:
+		return "INFO"
+	case TRACE:
+		return "TRACE"
+	case WARRING:
+		return "WARNING"
+	case ERROR:
+		return "ERROR"
+	case FATAL:
+		return "FATAL"
+	default:
+		return "DEBUG"
+	}
+
 }

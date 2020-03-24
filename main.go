@@ -104,7 +104,13 @@ func writeDemo3() {
 }
 
 func main() {
-	log, _ := myLog.NewLogger("error")
+/*	pc, file, line, ok := runtime.Caller(0)
+	if ok{
+		fmt.Println(strings.Split(runtime.FuncForPC(pc).Name(),".")[0],path.Base(file),line)
+	}*/
+	log, _ := myLog.NewLogger("debug")
+
+	log.Debug("这是一个debug测试")
 	for {
 		log.Debug("这是一个debug测试")
 		log.Trace("这是一个trace测试")
