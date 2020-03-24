@@ -50,9 +50,63 @@ func readByIoUtil(str string) {
 
 }
 
+func writeDemo1() {
+	fh, err := os.OpenFile("./test.txt", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0644)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer fh.Close()
+	for i := 0; i <= 4; i++ {
+
+		n, err := fh.Write([]byte("hello 岳伟超\n"))
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(n)
+	}
+
+}
+
+func writeDemo2() {
+	fh, err := os.OpenFile("./test.txt", os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer fh.Close()
+
+	for i := 0; i < 5; i++ {
+		n, err := fh.WriteString("hello,葛海琴\n")
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(n)
+	}
+
+}
+
+func writeDemo3() {
+	//fh, err := os.OpenFile("./test.txt", os.O_RDWR|os.O_APPEND|os.O_CREATE, 0644)
+	//if err != nil {
+	//	fmt.Println(err)
+	//	return
+	//}
+	//defer fh.Close()
+	err := ioutil.WriteFile("./test", []byte("hahhaa,kkksldk\nhhjajajhahs\n"), 0644)
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
 func main() {
+	//writeDemo2()
+	writeDemo3()
+	//writeDemo1()
 	//fileTobufio()
-	readByIoUtil("./calc/calc.go")
+	//readByIoUtil("./calc/calc.go")
 	//fmt.Println(calc.Jc(3))
 	/*fh, err := os.Open("./calc/calc.go")
 	if err != nil {
