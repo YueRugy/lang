@@ -111,10 +111,10 @@ func main() {
 		if ok{
 			fmt.Println(strings.Split(runtime.FuncForPC(pc).Name(),".")[0],path.Base(file),line)
 		}*/
-	log, _ := myLog.NewLogger("debug")
+	log := myLog.NewFileLogger("./path/", "log", "debug", 10*1024*1024)
 	//str := "yueyue%d"
 	//test(str,4)
-	for {
+	for i:=0;i<100;i++ {
 		log.Debug("这是一个debug测试")
 		log.Trace("这是一个trace测试")
 		name := "yue"
@@ -125,6 +125,7 @@ func main() {
 		log.Fatal("这是一个fatal测试")
 		time.Sleep(time.Duration(1 * time.Second))
 	}
+	log.FClose()
 	//writeDemo2()
 	//writeDemo3()
 	//writeDemo1()
