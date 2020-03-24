@@ -7,7 +7,9 @@ import (
 	"io"
 	"io/ioutil"
 	_ "lang/calc"
+	"lang/myLog"
 	"os"
+	"time"
 )
 
 const (
@@ -102,8 +104,18 @@ func writeDemo3() {
 }
 
 func main() {
+	log, _ := myLog.NewLogger("error")
+	for {
+		log.Debug("这是一个debug测试")
+		log.Trace("这是一个trace测试")
+		log.Info("这是一个info测试")
+		log.Warning("这是一个warning测试")
+		log.Error("这是一个error测试")
+		log.Fatal("这是一个fatal测试")
+		time.Sleep(time.Duration(1 * time.Second))
+	}
 	//writeDemo2()
-	writeDemo3()
+	//writeDemo3()
 	//writeDemo1()
 	//fileTobufio()
 	//readByIoUtil("./calc/calc.go")
