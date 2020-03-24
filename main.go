@@ -102,19 +102,24 @@ func writeDemo3() {
 		fmt.Println(err)
 	}
 }
-
+func test(str string, a ...interface{}) {
+	msg := fmt.Sprintf(str, a)
+	fmt.Println(msg)
+}
 func main() {
-/*	pc, file, line, ok := runtime.Caller(0)
-	if ok{
-		fmt.Println(strings.Split(runtime.FuncForPC(pc).Name(),".")[0],path.Base(file),line)
-	}*/
+	/*	pc, file, line, ok := runtime.Caller(0)
+		if ok{
+			fmt.Println(strings.Split(runtime.FuncForPC(pc).Name(),".")[0],path.Base(file),line)
+		}*/
 	log, _ := myLog.NewLogger("debug")
-
-	log.Debug("这是一个debug测试")
+	//str := "yueyue%d"
+	//test(str,4)
 	for {
 		log.Debug("这是一个debug测试")
 		log.Trace("这是一个trace测试")
-		log.Info("这是一个info测试")
+		name := "yue"
+		age := 10
+		log.Info("这是一个info测试 name[%s] age[%d]", name, age)
 		log.Warning("这是一个warning测试")
 		log.Error("这是一个error测试")
 		log.Fatal("这是一个fatal测试")
