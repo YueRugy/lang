@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"path"
 	"runtime"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -49,7 +48,7 @@ func parseLevel(level string) (logLevel, error) {
 }
 
 //noinspection GoExportedFuncWithUnexportedType
-func NewLogger(level string) (myLogger, error) {
+/*func NewLogger(level string) (myLogger, error) {
 
 	ll, err := parseLevel(level)
 	if err != nil {
@@ -60,7 +59,7 @@ func NewLogger(level string) (myLogger, error) {
 		ll,
 	}
 	return log, nil
-}
+}*/
 func judge(logLevel, level logLevel) bool {
 	return logLevel <= level
 }
@@ -102,26 +101,26 @@ func timeParse() string {
 func logPri(logLevel, level logLevel, format string, a ...interface{}) {
 	if judge(logLevel, level) {
 
-		sli := info(3)
+		methodName, basePath, line := info(3)
 		msg := fmt.Sprintf(format, a...)
-		line, _ := strconv.Atoi(sli[2])
+		//line, _ := strconv.Atoi(sli[2])
 		fmt.Printf("[%s] [%s] [%s:%s:%d] [%s]\n", timeParse(),
-			unParse(level), sli[1], sli[0], line, msg)
+			unParse(level), basePath, methodName, line, msg)
 	}
 }
-func info(skip int) []string {
+func info(skip int) (string, string, int) {
 	pc, file, line, ok := runtime.Caller(skip)
 	if !ok {
 		fmt.Println("get info failed")
-		return nil
+		//return nil
 	}
 
 	methodName := strings.Split(runtime.FuncForPC(pc).Name(), ".")[0]
 	basePath := path.Base(file)
 
-	sli := make([]string, 0, 3)
-	sli = append(append(append(sli, methodName), basePath), strconv.Itoa(line))
-	return sli
+	//sli := make([]string, 0, 3)
+	//sli = append(append(append(sli, methodName), basePath), strconv.Itoa(line))
+	return methodName, basePath, line
 }
 
 func unParse(level logLevel) string {
