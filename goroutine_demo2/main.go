@@ -12,7 +12,7 @@ var wait sync.WaitGroup
 
 //var rand rand2.Rand
 
-func f(ch chan int) {
+func f(ch chan<- int) {
 	defer wait.Done()
 	defer close(ch)
 
@@ -21,7 +21,7 @@ func f(ch chan int) {
 	}
 }
 
-func f2(ch1, ch2 chan int) {
+func f2(ch1 <-chan int, ch2 chan<- int) {
 
 	defer wait.Done()
 	defer once.Do(func() {
