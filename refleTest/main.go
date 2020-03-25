@@ -1,11 +1,11 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"reflect"
-	. "strings"
+	"strconv"
+	"strings"
 )
 
 /*type person struct {
@@ -36,89 +36,109 @@ func main() {
 	var mc Config
 
 	err := loadIni("./conf.ini", &mc)
-	fmt.Println(err)
+	//fmt.Println(err)
+	if err != nil {
+		print("haha")
+	}
+	fmt.Println(mc)
 }
 
 func loadIni(fileName string, data interface{}) error {
-	//0 参数的校验
-	//01 data 必须是指针类型
-	t := reflect.TypeOf(data)
-	//fmt.Println(t.Elem().Kind())
-	if t.Kind() != reflect.Ptr || t.Elem().Kind() != reflect.Struct {
-		return errors.New("not struct ptr type")
+	//判断data 是否是结构体的指针类型
+	dataType := reflect.TypeOf(data)
+	if dataType.Kind() != reflect.Ptr || dataType.Elem().Kind() != reflect.Struct {
+		return fmt.Errorf("syntax type data")
 	}
-	//2读取文件
-	b, err := ioutil.ReadFile(fileName)
+
+	//读文件
+	fileByte, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		return err
+		return fmt.Errorf("open ini file failed")
 	}
+	//转换成字符串
+	fileContent := string(fileByte)
+	contentArray := strings.Split(fileContent, "\n")
+	var sectionName string
 	var structName string
-	//2.1 一行一行读数据
-	strArray := Split(string(b), "\n")
-	for idx, line := range strArray {
-		line = TrimSpace(line)
-		//2.2注释跳过
-		if HasPrefix(line, ";") || HasPrefix(line, "#") ||
-			len(line) == 0 {
+	//一行行解析字符串
+	for idx, line := range contentArray {
+		//注释空行跳过
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, ";") || strings.HasPrefix(line, "#") || len(line) == 0 {
 			continue
 		}
-		//如果是[开头表示节(section)
-		if HasPrefix(line, "[") {
-			//校验是否是合法的section
-			//左右中括号不匹配
-			if !HasSuffix(line, "]") {
-				return fmt.Errorf("line %d syntax error", idx+1)
+
+		//[表示一个节点section
+		if strings.HasPrefix(line, "[") {
+			//校验合法性
+			//获取节点名
+			sectionName = strings.TrimSpace(line[1 : len(line)-1])
+			if !strings.HasSuffix(line, "]") ||
+				len(sectionName) == 0 {
+				return fmt.Errorf("%d行syntax error section", idx+1)
 			}
 
-			sectionName := TrimSpace(line[1 : len(line)-1])
-			//中括号内没有内容
-			if len(sectionName) == 0 {
-				return fmt.Errorf("line %d syntax error", idx+1)
-			}
-
-			for i := 0; i < t.Elem().NumField(); i++ {
-				field := t.Elem().Field(i)
-				if field.Tag.Get("ini") == sectionName {
+			for i := 0; i < dataType.Elem().NumField(); i++ {
+				field := dataType.Elem().Field(i)
+				tag := field.Tag.Get("ini")
+				if tag == sectionName {
 					structName = field.Name
-					fmt.Println(structName)
 					break
 				}
 			}
+
 		} else {
-			if Index(line, "=") == -1 || HasSuffix(line,
-				"=") || HasPrefix(line, "=") {
-				return fmt.Errorf("line %d syntax error", idx+1)
+
+			//在dataType获取与sectionName相同的tag
+			sectionValue := reflect.ValueOf(data).Elem().FieldByName(structName)
+			//fmt.Println(sectionValue.Kind())
+			sectionType := sectionValue.Type()
+			//fmt.Println(sectionType.Kind())
+			//是否是结构体
+			if sectionType.Kind() != reflect.Struct {
+				return fmt.Errorf("Config 中的变量 %v 不是结构体", sectionType.Name())
 			}
-
-			v := reflect.ValueOf(data)
-			sv := v.Elem().FieldByName(structName) //拿到嵌套结构体值信息
-			st := sv.Type()                        //拿到嵌套结构体类型信息
-			if st.Kind() != reflect.Struct {
-				return fmt.Errorf("data 中的%d字段应该是一个结构体",
-					idx+1)
-
+			//获取=k ,v并校验
+			if strings.Index(line, "=") == -1 || strings.
+				HasSuffix(line, "=") || strings.
+				HasPrefix(line, "=") {
+				return fmt.Errorf("= syntax error %d", idx+1)
 			}
-
-			index := Index(line, "=")
-			k := line[:index]
-			//value := line[index+1:]
-			var fieldType reflect.StructField
-			for i := 0; i < st.NumField(); i++ {
-				//field := sv.Field(i)
-				field := st.Field(i)
-				fieldType = field
+			KVArray := strings.Split(line, "=")
+			k := KVArray[0]
+			v := KVArray[1]
+			var fieldName string
+			var field reflect.StructField
+			//fmt.Println(k,v)
+			//赋值
+			for i := 0; i < sectionType.NumField(); i++ {
+				field = sectionType.Field(i)
 				if field.Tag.Get("ini") == k {
-					fileName = field.Namegit
+					fieldName = field.Name
 					break
 				}
 
 			}
-			fmt.Println(fileName,fieldType.Type.Kind())
 
+			if v == "jj" {
+
+			}
+			fmt.Println(fieldName, field.Type.Kind())
+			sectionValueField := sectionValue.FieldByName(fieldName)
+			//	fmt.Println(field.Name,field.Type.Kind())
+			switch field.Type.Kind() {
+			case reflect.String:
+				sectionValueField.SetString(v)
+			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+				value, _ := strconv.ParseInt(v, 10, 64)
+				sectionValueField.SetInt(value)
+			}
+			
 		}
+
+		//fmt.Println(idx, line)
+
 	}
-	//fmt.Println(strArray)
 
 	return nil
-
 }
