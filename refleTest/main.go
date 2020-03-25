@@ -133,7 +133,7 @@ func loadIni(fileName string, data interface{}) error {
 				value, _ := strconv.ParseInt(v, 10, 64)
 				sectionValueField.SetInt(value)
 			}
-			
+
 		}
 
 		//fmt.Println(idx, line)
