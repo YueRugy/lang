@@ -19,7 +19,8 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	preparseQuery(3)
+	tran()
+	//preparseQuery(3)
 	//preparseInsert()
 	//deleteById(1)
 	//insert()
@@ -183,5 +184,40 @@ func preparseQuery(id int) {
 	}
 
 	fmt.Println(sli)
+
+}
+
+func tran() {
+	tx, err := db.Begin()
+	if err != nil {
+		fmt.Println("open tran failed", err)
+		return
+	}
+	sqlStr1 := "update user set age=8000 where id =?"
+	sqlStr2 := "update user set age=80000 where id =?"
+
+	_, err1 := tx.Exec(sqlStr1, 2)
+	if err1 != nil {
+		fmt.Println("update failed", err1)
+		err = tx.Rollback()
+		if err != nil {
+			fmt.Println("rollback failed", err)
+		}
+		return
+	}
+	_, err2 := tx.Exec(sqlStr2, 3)
+	if err2 != nil {
+		fmt.Println("update failed", err2)
+		err = tx.Rollback()
+		if err != nil {
+			fmt.Println("rollback failed", err)
+		}
+		return
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		fmt.Println("commit failed ", err)
+	}
 
 }
