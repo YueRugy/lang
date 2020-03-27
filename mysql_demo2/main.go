@@ -19,7 +19,9 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	deleteById(1)
+	preparseQuery(3)
+	//preparseInsert()
+	//deleteById(1)
 	//insert()
 	//updateDemo()
 	//query1 := "select id,name,age from user where id =?"
@@ -120,4 +122,66 @@ func initDB() (err error) {
 		return
 	}
 	return nil
+}
+func preparseInsert() {
+	dsn := `insert into user (name,age) values(?,?)`
+
+	stmt, err := db.Prepare(dsn)
+	if err != nil {
+		fmt.Println("preparse failed", err)
+		return
+	}
+	defer stmt.Close()
+	m := map[string]int{
+		"feng": 23,
+		"diao": 25,
+		"long": 27,
+	}
+
+	for k, v := range m {
+		ret, err1 := stmt.Exec(k, v)
+		if err1 != nil {
+			fmt.Println("insert failed", err1)
+			return
+		}
+		n, err2 := ret.RowsAffected()
+		if err2 != nil {
+			fmt.Println("get affected failed", err2)
+			return
+		}
+
+		fmt.Println(n)
+	}
+
+}
+
+func preparseQuery(id int) {
+	sqlStr := "select id,name,age from user where id >? "
+
+	stmt, err := db.Prepare(sqlStr)
+	if err != nil {
+		fmt.Println("preparse failed", err)
+		return
+	}
+
+	defer stmt.Close()
+	rows, err1 := stmt.Query(id)
+	if err1 != nil {
+		fmt.Println("select failed", err1)
+		return
+	}
+	defer rows.Close()
+	sli := make([]user, 0, 20)
+	for ; rows.Next(); {
+		var u user
+		err2 := rows.Scan(&u.id, &u.name, &u.age)
+		if err2 != nil {
+			fmt.Println("select scan failed ", err2)
+			return
+		}
+		sli = append(sli, u)
+	}
+
+	fmt.Println(sli)
+
 }
